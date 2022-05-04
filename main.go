@@ -13,11 +13,6 @@ import (
 type Request struct {
 	Adn []string `json:"adn"`
 }
-
-type Response struct {
-	Message string `json:"message"`
-	Status  int    `json:"status"`
-}
 type ResponseData struct {
 	Status int
 	Output []byte
