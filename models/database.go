@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,15 +18,12 @@ type MutantModel struct {
 }
 
 type ResponseMutant struct {
-	CountMutant int64
-	CountHuman  int64
-	Ratio       float32
+	CountMutant int64   `json:"count_mutant_dna"`
+	CountHuman  int64   `json:"count_human_dna"`
+	Ratio       float32 `json:"ratio"`
 }
 
 func dataBaseConnection() *mongo.Client {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
 	uri := os.Getenv("MONGODB_URI")
 	if uri == "" {
 		log.Fatal("You must set your 'MONGODB_URI' environmental variable.")
@@ -87,7 +83,7 @@ func GetDataCollection() *ResponseMutant {
 	response.CountMutant = <-canal
 	go response.countHumans(canal)
 	response.CountHuman = <-canal
-	defer disconnect()
+	disconnect()
 	response.calculateRatio()
 	return response
 }
@@ -97,5 +93,5 @@ func SaveDna(adn []string, isMutant bool) {
 		Adn: adn, IsMutant: isMutant,
 	}
 	mutModel.saveAdn()
-	defer disconnect()
+	disconnect()
 }

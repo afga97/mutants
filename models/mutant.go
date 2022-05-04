@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -11,6 +12,11 @@ type Mutante struct {
 	isMutantFlat bool
 	iterLetter   string
 	function     string
+}
+
+type ResponseMutantSave struct {
+	Message string `json:"message"`
+	Status  int    `json:"status"`
 }
 
 /**
@@ -146,7 +152,9 @@ func (mutant *Mutante) writeData() {
  * @param []dna array de string con cadenas de adn
  * @returns bool si es mutante, true de lo contrario false
  */
-func IsMutant(dna []string) bool {
+func IsMutant(dna []string) *ResponseMutantSave {
+	var status int
+	message := ""
 	mutant := Mutante{}
 	mutant.adnCadena = dna
 	mutant.insertDna(dna)
@@ -155,5 +163,13 @@ func IsMutant(dna []string) bool {
 	mutant.validateDiagonal()
 	mutant.writeData()
 	SaveDna(mutant.adnCadena, mutant.isMutantFlat)
-	return mutant.isMutantFlat
+	if mutant.isMutantFlat {
+		message = "You are a mutant"
+		status = http.StatusOK
+	} else {
+		message = "You are human"
+		status = http.StatusForbidden
+	}
+	responseMutant := &ResponseMutantSave{message, status}
+	return responseMutant
 }
